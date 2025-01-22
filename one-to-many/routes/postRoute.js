@@ -46,12 +46,13 @@ router.delete("/:id", async (req, res) => {
   try {
     const postId = req.params.id;
     const deletedPost = await postModel.findById(postId);
-    await postModel.findByIdAndDelete(postId);
     if (!deletedPost) {
       return res.status(404).send("Post pas trouve");
     }
-    await userModel.findByIdAndUpdate(deletedPost._id, {
-      $pull: { posts: postId },
+    await postModel.findByIdAndDelete(postId);
+    const author = deletedPost.author;
+    await userModel.findByIdAndUpdate(author, {
+      $pull: { posts: deletedPost._id },
     });
     res.status(200).send("Post supprime!");
   } catch (err) {
